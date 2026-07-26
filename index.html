@@ -393,6 +393,31 @@
 </div>
 
 <script>
+  // --- CUSTOM LAYER REGISTRATION FIX ---
+  function registerPassThroughLayer(layerName) {
+    class PassThrough extends tf.layers.Layer {
+      constructor(config) { 
+        super(config); 
+      }
+      computeOutputShape(inputShape) { 
+        return inputShape; 
+      }
+      call(inputs) { 
+        return Array.isArray(inputs) ? inputs[0] : inputs; 
+      }
+      static get className() { 
+        return layerName; 
+      }
+    }
+    tf.serialization.registerClass(PassThrough);
+  }
+
+  // Register the missing augmentation layers
+  registerPassThroughLayer('RandomFlip');
+  registerPassThroughLayer('RandomRotation');
+  registerPassThroughLayer('RandomZoom');
+  // -------------------------------------
+
   const IMG_SIZE = 256;
   const CLASS_NAMES = [
     "Dermatitis",
