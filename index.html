@@ -9,21 +9,22 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- TensorFlow.js -->
+<!-- TensorFlow.js[cite: 1] -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
 
 <style>
   :root {
-    /* Color Palette */
-    --ink: #172E22;
-    --ink-soft: #3E5348;
-    --ivory: #FBF7EE;
+    /* Refined Color Palette */
+    --ink: #112319;
+    --ink-soft: #4A5D53;
+    --bg-page: #FAF9F6;
     --card: #FFFFFF;
-    --line: #DCD4C2;
+    --line: #E2DDD3;
     --ochre: #C8892C;
     --ochre-dark: #9C6A1F;
+    --ochre-light: #FBF3E3;
     --sage: #6E8F6C;
     --rust: #B15C3E;
     
@@ -33,9 +34,9 @@
     --sans: 'Inter', sans-serif;
     
     /* Effects */
-    --shadow-sm: 0 2px 4px rgba(23,46,34,0.04);
-    --shadow-md: 0 4px 12px rgba(23,46,34,0.06);
-    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-sm: 0 4px 12px rgba(17, 35, 25, 0.03);
+    --shadow-md: 0 12px 32px rgba(17, 35, 25, 0.05);
+    --transition: 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   * { 
@@ -45,26 +46,82 @@
   }
 
   body {
-    background: var(--ivory);
+    background: var(--bg-page);
     color: var(--ink);
     font-family: var(--sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
-  /* Focus states for accessibility */
+  /* Accessibility */
   *:focus-visible {
     outline: 2px solid var(--ochre);
-    outline-offset: 2px;
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 
-  .wrap {
-    max-width: 580px;
+  /* Split Layout Architecture */
+  .layout-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* The Visual Side (Dog Image) */
+  .hero-visual {
+    width: 100%;
+    height: 35vh;
+    position: relative;
+    background-color: var(--sage);
+  }
+
+  .hero-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+  }
+
+  .hero-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(17,35,25,0.2) 0%, transparent 100%);
+  }
+
+  /* The Application Side */
+  .app-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 24px 80px;
+    width: 100%;
+    max-width: 600px;
     margin: 0 auto;
-    padding: 64px 24px 80px;
   }
 
+  @media (min-width: 960px) {
+    .layout-wrapper {
+      flex-direction: row;
+    }
+    
+    .hero-visual {
+      height: 100vh;
+      flex: 1;
+      position: sticky;
+      top: 0;
+    }
+
+    .app-content {
+      flex: 1.2;
+      padding: 80px 64px;
+      max-width: 800px;
+      justify-content: center;
+    }
+  }
+
+  /* Header Typography */
   header.top {
     margin-bottom: 48px;
   }
@@ -72,27 +129,27 @@
   .eyebrow {
     font-family: var(--mono);
     font-size: 0.75rem;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--ochre-dark);
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 20px;
-    font-weight: 500;
+    margin-bottom: 24px;
+    font-weight: 600;
   }
 
   .eyebrow::before {
     content: '';
-    width: 24px;
+    width: 32px;
     height: 1px;
     background: var(--ochre-dark);
   }
 
   h1 {
     font-family: var(--serif);
-    font-weight: 500;
-    font-size: clamp(2.2rem, 6vw, 3rem);
+    font-weight: 400;
+    font-size: clamp(2.4rem, 5vw, 3.5rem);
     line-height: 1.05;
     margin: 0 0 16px;
     letter-spacing: -0.02em;
@@ -100,6 +157,7 @@
 
   h1 em {
     font-style: italic;
+    font-weight: 300;
     color: var(--ochre-dark);
   }
 
@@ -114,15 +172,15 @@
   .panel {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 32px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
   }
 
   #dropzone {
     border: 2px dashed #C9BFA6;
     border-radius: 16px;
-    padding: 40px 20px;
+    padding: 48px 24px;
     text-align: center;
     cursor: pointer;
     transition: all var(--transition);
@@ -131,30 +189,35 @@
   }
 
   #dropzone:hover {
-    border-color: var(--ochre-dark);
+    border-color: var(--ochre);
     background: #FCFAF5;
   }
 
   #dropzone.drag {
     border-color: var(--ochre);
-    background: #FBF3E3;
-    transform: scale(1.01);
+    background: var(--ochre-light);
+    transform: scale(1.02);
   }
 
-  #dropzone .paw {
-    width: 38px;
-    height: 38px;
+  .upload-icon {
+    width: 48px;
+    height: 48px;
     margin: 0 auto 16px;
-    opacity: 0.6;
-    transition: opacity var(--transition);
+    background: var(--ochre-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ochre-dark);
+    transition: transform var(--transition);
   }
 
-  #dropzone:hover .paw {
-    opacity: 0.9;
+  #dropzone:hover .upload-icon {
+    transform: translateY(-2px);
   }
 
   #dropText {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--ink-soft);
   }
 
@@ -170,7 +233,7 @@
 
   #preview {
     max-width: 100%;
-    max-height: 300px;
+    max-height: 320px;
     border-radius: 12px;
     display: block;
     margin: 0 auto;
@@ -179,7 +242,7 @@
   }
 
   #changePhoto {
-    margin-top: 16px;
+    margin-top: 20px;
     font-family: var(--mono);
     font-size: 0.75rem;
     letter-spacing: 0.05em;
@@ -188,14 +251,14 @@
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px 8px;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-    transition: color var(--transition);
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all var(--transition);
+    font-weight: 600;
   }
 
   #changePhoto:hover {
-    color: var(--ochre);
+    background: var(--ochre-light);
   }
 
   /* Submit Button */
@@ -203,48 +266,45 @@
     width: 100%;
     margin-top: 24px;
     background: var(--ink);
-    color: var(--ivory);
+    color: var(--card);
     border: none;
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 14px;
+    padding: 18px;
     font-family: var(--sans);
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 500;
+    font-size: 1.05rem;
     cursor: pointer;
     transition: all var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    box-shadow: var(--shadow-sm);
+    gap: 12px;
   }
 
   button#submitBtn:hover:not(:disabled) { 
-    background: #22402F; 
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    background: #1F3D2D; 
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(17, 35, 25, 0.15);
   }
   
   button#submitBtn:active:not(:disabled) { 
-    transform: translateY(1px); 
-    box-shadow: none;
+    transform: translateY(0); 
   }
   
   button#submitBtn:disabled {
-    background: #D8D2C3;
+    background: var(--line);
     color: #9A9382;
     cursor: not-allowed;
-    box-shadow: none;
   }
 
   /* Loading Spinner */
   .spin {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(251,247,238,0.35);
-    border-top-color: var(--ivory);
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: var(--card);
     border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+    animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     display: none;
   }
 
@@ -252,7 +312,7 @@
 
   #status, #error {
     font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     text-align: center;
     margin-top: 16px;
     min-height: 1.2em;
@@ -261,51 +321,44 @@
   #status { color: var(--ink-soft); }
   #error { color: var(--rust); font-weight: 500; }
 
-  /* Result Slip */
+  /* Premium Result Slip */
   #result {
     display: none;
-    margin-top: 32px;
+    margin-top: 40px;
   }
 
   .slip {
     background: var(--card);
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 16px;
     position: relative;
     overflow: hidden;
-    animation: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: var(--shadow-md);
+    animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow: var(--shadow-sm);
+    opacity: 0;
   }
 
   @keyframes rise {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .slip::before {
-    content: '';
-    display: block;
-    height: 0;
-    border-top: 2px dashed #D8D2C3;
-    margin: 0 24px;
-    position: relative;
-    top: 24px;
-  }
-
   .slip-head {
-    padding: 24px 24px 28px;
+    padding: 32px 32px 24px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    border-bottom: 1px dashed var(--line);
   }
 
   .slip-label, .slip-conf-label {
     font-family: var(--mono);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #9A9382;
     margin-bottom: 8px;
+    font-weight: 600;
   }
 
   .slip-conf-label {
@@ -314,29 +367,29 @@
 
   .slip-class {
     font-family: var(--serif);
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 500;
-    line-height: 1.15;
+    line-height: 1.1;
   }
 
   .slip-conf {
     font-family: var(--mono);
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 500;
     text-align: right;
   }
 
   .slip-body {
-    padding: 8px 24px 28px;
+    padding: 24px 32px 32px;
   }
 
   .bar-row {
     display: grid;
-    grid-template-columns: 130px 1fr 50px;
+    grid-template-columns: 140px 1fr 50px;
     align-items: center;
-    gap: 12px;
-    padding: 8px 0;
-    font-size: 0.85rem;
+    gap: 16px;
+    padding: 10px 0;
+    font-size: 0.9rem;
   }
 
   .bar-name {
@@ -352,8 +405,8 @@
   }
 
   .bar-track {
-    height: 8px;
-    background: #EFEAE0;
+    height: 6px;
+    background: var(--bg-page);
     border-radius: 6px;
     overflow: hidden;
   }
@@ -361,28 +414,29 @@
   .bar-fill {
     height: 100%;
     border-radius: 6px;
-    transition: width 0.8s cubic-bezier(.22,1,.36,1);
+    transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .bar-pct {
     font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--ink-soft);
     text-align: right;
   }
 
   .slip-note {
-    border-top: 1px solid var(--line);
-    padding: 18px 24px;
-    font-size: 0.85rem;
+    padding: 24px 32px;
+    font-size: 0.9rem;
     color: var(--ink-soft);
-    background: #FAF7F0;
+    background: var(--bg-page);
     line-height: 1.6;
+    border-top: 1px solid var(--line);
   }
 
   footer {
-    margin-top: 48px;
-    font-size: 0.8rem;
+    margin-top: auto;
+    padding-top: 48px;
+    font-size: 0.85rem;
     color: #9A9382;
     line-height: 1.6;
     text-align: center;
@@ -390,73 +444,84 @@
 </style>
 </head>
 <body>
-<main class="wrap">
+<div class="layout-wrapper">
+  
+  <!-- Visual Hero Section (The "Show Dogs" part) -->
+  <aside class="hero-visual" aria-hidden="true">
+    <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="A beautiful, healthy dog resting peacefully" />
+  </aside>
 
-  <header class="top">
-    <div class="eyebrow">Skin screening, from a photo</div>
-    <h1>What's going on<br>with their <em>skin?</em></h1>
-    <p class="sub">Upload a clear, well-lit photo of the affected area. This runs privately in your browser and gives a screening read — not a diagnosis.</p>
-  </header>
+  <!-- Application Content -->
+  <main class="app-content">
+    <header class="top">
+      <div class="eyebrow">Dermatology AI</div>
+      <h1>What's going on<br>with their <em>skin?</em></h1>
+      <p class="sub">Upload a clear, well-lit photo of the affected area. This runs privately in your browser and gives a screening read — not a diagnosis[cite: 1].</p>
+    </header>
 
-  <section class="panel" aria-label="Upload Panel">
-    <!-- Dropzone -->
-    <div id="dropzone" role="button" tabindex="0" aria-label="Upload a photo">
-      <input type="file" id="fileInput" accept="image/*" style="display:none" aria-hidden="true" />
-      <svg class="paw" viewBox="0 0 24 24" fill="none" stroke="#8A9C82" stroke-width="1.4">
-        <ellipse cx="12" cy="15.5" rx="5.2" ry="4.3"/>
-        <ellipse cx="6.2" cy="9.5" rx="1.8" ry="2.3"/>
-        <ellipse cx="10.6" cy="6.5" rx="1.8" ry="2.4"/>
-        <ellipse cx="15.4" cy="6.5" rx="1.8" ry="2.4"/>
-        <ellipse cx="19.8" cy="9.5" rx="1.8" ry="2.3"/>
-      </svg>
-      <div id="dropText"><strong>Click to upload</strong> or drag a photo here</div>
+    <section class="panel" aria-label="Upload Panel">
+      <!-- Dropzone -->
+      <div id="dropzone" role="button" tabindex="0" aria-label="Upload a photo">
+        <input type="file" id="fileInput" accept="image/*" style="display:none" aria-hidden="true" />
+        
+        <div class="upload-icon">
+          <!-- Premium Paw/Camera SVG -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        
+        <div id="dropText"><strong>Click to select</strong> or drag a photo here</div>
+        
+        <!-- Preview Wrapper -->
+        <div id="previewWrap">
+          <img id="preview" alt="Preview of uploaded skin photo" />
+          <div>
+            <button id="changePhoto" type="button" aria-label="Choose a different photo">Upload different photo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button id="submitBtn" disabled aria-live="polite">
+        <span class="spin" id="spinner"></span>
+        <span id="btnLabel">Loading model…</span>
+      </button>
       
-      <!-- Preview Wrapper -->
-      <div id="previewWrap">
-        <img id="preview" alt="Preview of uploaded skin photo" />
-        <div>
-          <button id="changePhoto" type="button" aria-label="Choose a different photo">Choose a different photo</button>
+      <!-- Status / Error Feedback -->
+      <div id="status" aria-live="polite"></div>
+      <div id="error" aria-live="assertive"></div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="result" aria-live="polite">
+      <div class="slip">
+        <div class="slip-head">
+          <div>
+            <div class="slip-label">Most Likely Assessment</div>
+            <div class="slip-class" id="topClass">—</div>
+          </div>
+          <div>
+            <div class="slip-conf-label">Confidence</div>
+            <div class="slip-conf" id="topConf">—</div>
+          </div>
+        </div>
+        <div class="slip-body" id="barList"></div>
+        <div class="slip-note">
+          <strong>Medical Note:</strong> This is a screening tool, not a veterinary diagnosis[cite: 1]. If something looks off, please have a vet take a look — especially for anything spreading, painful, or not improving[cite: 1].
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Action Button -->
-    <button id="submitBtn" disabled aria-live="polite">
-      <span class="spin" id="spinner"></span>
-      <span id="btnLabel">Loading model…</span>
-    </button>
-    
-    <!-- Status / Error Feedback -->
-    <div id="status" aria-live="polite"></div>
-    <div id="error" aria-live="assertive"></div>
-  </section>
+    <footer>Runs completely on your device. No photos are ever sent to a server.</footer>
+  </main>
 
-  <!-- Results Section -->
-  <section id="result" aria-live="polite">
-    <div class="slip">
-      <div class="slip-head">
-        <div>
-          <div class="slip-label">Most likely</div>
-          <div class="slip-class" id="topClass">—</div>
-        </div>
-        <div>
-          <div class="slip-conf-label">Confidence</div>
-          <div class="slip-conf" id="topConf">—</div>
-        </div>
-      </div>
-      <div class="slip-body" id="barList"></div>
-      <div class="slip-note">
-        <strong>Note:</strong> This is a screening tool, not a veterinary diagnosis. If something looks off, please have a vet take a look — especially for anything spreading, painful, or not improving.
-      </div>
-    </div>
-  </section>
-
-  <footer>Runs fully in your browser. No photo is uploaded to a server.</footer>
-</main>
+</div>
 
 <script>
+  // Original Configuration[cite: 1]
   const IMG_SIZE = 256;
-  // Classes from original setup
   const CLASS_NAMES = [
     "Dermatitis",
     "Fungal_infections",
@@ -464,17 +529,17 @@
     "Hypersensitivity",
     "demodicosis",
     "ringworm",
-  ];
+  ];[cite: 1]
   
-  const CLASS_COLOR = (name) => name.toLowerCase() === 'healthy' ? '#6E8F6C' : '#C8892C';
+  const CLASS_COLOR = (name) => name.toLowerCase() === 'healthy' ? '#6E8F6C' : '#C8892C';[cite: 1]
 
-  // Utility to clean up class names for professional display
+  // Presentation Formatter
   const formatClassName = (name) => {
     const cleanName = name.replace(/_/g, ' ');
-    return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+    return cleanName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
-  // DOM Elements
+  // DOM Elements[cite: 1]
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const dropText = document.getElementById('dropText');
@@ -496,22 +561,21 @@
 
   async function loadModel() {
     try {
-      statusDiv.textContent = 'Loading model…';
-      model = await tf.loadGraphModel('tfjs_model/model.json');
+      statusDiv.textContent = 'Loading AI model…';
+      model = await tf.loadGraphModel('tfjs_model/model.json');[cite: 1]
       statusDiv.textContent = '';
-      btnLabel.textContent = 'Check photo';
+      btnLabel.textContent = 'Analyze Photo';
       if (selectedFile) submitBtn.disabled = false;
     } catch (err) {
       statusDiv.textContent = '';
-      errorDiv.textContent = 'Could not load model: ' + err.message;
-      btnLabel.textContent = 'Model failed to load';
+      errorDiv.textContent = 'Model failed to load: ' + err.message;[cite: 1]
+      btnLabel.textContent = 'System Offline';
     }
   }
   
-  // Initialize Model
   loadModel();
 
-  // Accessibility for keyboard users on dropzone
+  // Interactions[cite: 1]
   dropzone.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -519,7 +583,6 @@
     }
   });
 
-  // Dropzone Event Listeners
   dropzone.addEventListener('click', (e) => {
     if (e.target === changePhoto) return;
     fileInput.click();
@@ -535,11 +598,11 @@
   dropzone.addEventListener('drop', e => {
     e.preventDefault();
     dropzone.classList.remove('drag');
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);[cite: 1]
   });
   
   fileInput.addEventListener('change', () => {
-    if (fileInput.files.length) handleFile(fileInput.files[0]);
+    if (fileInput.files.length) handleFile(fileInput.files[0]);[cite: 1]
   });
   
   changePhoto.addEventListener('click', (e) => {
@@ -550,6 +613,7 @@
   function handleFile(file) {
     selectedFile = file;
     preview.src = URL.createObjectURL(file);
+    dropzone.querySelector('.upload-icon').style.display = 'none';
     dropText.style.display = 'none';
     previewWrap.style.display = 'block';
     if (model) submitBtn.disabled = false;
@@ -560,19 +624,19 @@
   submitBtn.addEventListener('click', async () => {
     if (!selectedFile || !model) return;
     submitBtn.disabled = true;
-    btnLabel.textContent = 'Reading the photo…';
+    btnLabel.textContent = 'Analyzing…';
     spinner.style.display = 'inline-block';
     errorDiv.textContent = '';
-    resultDiv.style.display = 'none'; // Hide previous result on new run
+    resultDiv.style.display = 'none';
 
     try {
-      const scores = await runPrediction(preview);
-      renderResult(scores);
+      const scores = await runPrediction(preview);[cite: 1]
+      renderResult(scores);[cite: 1]
     } catch (err) {
       errorDiv.textContent = err.message;
     } finally {
       submitBtn.disabled = false;
-      btnLabel.textContent = 'Check photo';
+      btnLabel.textContent = 'Analyze New Photo';
       spinner.style.display = 'none';
     }
   });
@@ -583,28 +647,28 @@
         .resizeBilinear([IMG_SIZE, IMG_SIZE])
         .toFloat()
         .div(255.0)
-        .expandDims(0);
+        .expandDims(0);[cite: 1]
     });
 
-    const prediction = model.predict(tensor);
-    const scoresArray = await prediction.data();
+    const prediction = model.predict(tensor);[cite: 1]
+    const scoresArray = await prediction.data();[cite: 1]
     tensor.dispose();
     prediction.dispose();
 
     const scores = {};
-    CLASS_NAMES.forEach((name, i) => { scores[name] = scoresArray[i]; });
+    CLASS_NAMES.forEach((name, i) => { scores[name] = scoresArray[i]; });[cite: 1]
     return scores;
   }
 
   function renderResult(scores) {
-    const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-    const [leadName, leadScore] = entries[0];
+    const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);[cite: 1]
+    const [leadName, leadScore] = entries[0];[cite: 1]
 
     const formattedLeadName = formatClassName(leadName);
 
     topClass.textContent = formattedLeadName;
     topClass.style.color = CLASS_COLOR(leadName);
-    topConf.textContent = (leadScore * 100).toFixed(1) + '%';
+    topConf.textContent = (leadScore * 100).toFixed(1) + '%';[cite: 1]
 
     barList.innerHTML = '';
     entries.forEach(([name, score], i) => {
@@ -617,20 +681,22 @@
         <div class="bar-name ${i === 0 ? 'top' : ''}" title="${formattedName}">${formattedName}</div>
         <div class="bar-track"><div class="bar-fill" style="width:0%; background:${CLASS_COLOR(name)}"></div></div>
         <div class="bar-pct">${pct}%</div>
-      `;
+      `;[cite: 1]
       barList.appendChild(row);
       
-      // Animate bars after appending
       requestAnimationFrame(() => {
-        // Small delay ensures transition fires cleanly
         setTimeout(() => {
-          row.querySelector('.bar-fill').style.width = pct + '%';
-        }, 50);
+          row.querySelector('.bar-fill').style.width = pct + '%';[cite: 1]
+        }, 100);
       });
     });
 
     resultDiv.style.display = 'block';
-    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    // Smooth scroll down slightly to focus on results on mobile
+    if (window.innerWidth < 960) {
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 </script>
 </body>
