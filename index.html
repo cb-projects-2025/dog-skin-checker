@@ -1,102 +1,562 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dog Skin Disease Classifier</title>
-    <!-- Load TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Skin Screening — for dogs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<style>
+  :root {
+    --ink: #172E22;
+    --ink-soft: #3E5348;
+    --ivory: #FBF7EE;
+    --card: #FFFFFF;
+    --line: #DCD4C2;
+    --ochre: #C8892C;
+    --ochre-dark: #9C6A1F;
+    --sage: #6E8F6C;
+    --rust: #B15C3E;
+    --mono: 'IBM Plex Mono', monospace;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ivory);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  header.top {
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ochre-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--ochre-dark);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(2rem, 6vw, 2.7rem);
+    line-height: 1.08;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--ochre-dark);
+  }
+
+  p.sub {
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    max-width: 42ch;
+    margin: 0;
+  }
+
+  /* Upload card */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 1px 2px rgba(23,46,34,0.04);
+  }
+
+  #dropzone {
+    border: 1.5px dashed #C9BFA6;
+    border-radius: 14px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    position: relative;
+  }
+
+  #dropzone.drag {
+    border-color: var(--ochre);
+    background: #FBF3E3;
+  }
+
+  #dropzone .paw {
+    width: 34px;
+    height: 34px;
+    margin: 0 auto 14px;
+    opacity: 0.55;
+  }
+
+  #dropText {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+
+  #dropText strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  #previewWrap {
+    display: none;
+    margin-top: 6px;
+  }
+
+  #preview {
+    max-width: 100%;
+    max-height: 280px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+  }
+
+  #changePhoto {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ochre-dark);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  button#submitBtn {
+    width: 100%;
+    margin-top: 18px;
+    background: var(--ink);
+    color: var(--ivory);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  button#submitBtn:hover:not(:disabled) { background: #22402F; }
+  button#submitBtn:active:not(:disabled) { transform: scale(0.99); }
+  button#submitBtn:disabled {
+    background: #D8D2C3;
+    color: #9A9382;
+    cursor: not-allowed;
+  }
+
+  .spin {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(251,247,238,0.35);
+    border-top-color: var(--ivory);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #status {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 12px;
+    min-height: 1.2em;
+  }
+
+  #error {
+    color: var(--rust);
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  /* Result: report-slip aesthetic */
+  #result {
+    display: none;
+    margin-top: 28px;
+  }
+
+  .slip {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    animation: rise 0.35s ease;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slip::before {
+    content: '';
+    display: block;
+    height: 0;
+    border-top: 2px dashed #D8D2C3;
+    margin: 0 18px;
+    position: relative;
+    top: 22px;
+  }
+
+  .slip-head {
+    padding: 20px 22px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .slip-label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #9A9382;
+    margin-bottom: 6px;
+  }
+
+  .slip-class {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+
+  .slip-conf {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    font-weight: 500;
+    text-align: right;
+  }
+
+  .slip-conf-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: #9A9382;
+    text-align: right;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .slip-body {
+    padding: 4px 22px 22px;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 118px 1fr 46px;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: 0.82rem;
+  }
+
+  .bar-name {
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-name.top { color: var(--ink); font-weight: 600; }
+
+  .bar-track {
+    height: 6px;
+    background: #EFEAE0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(.22,1,.36,1);
+  }
+
+  .bar-pct {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  .slip-note {
+    border-top: 1px solid var(--line);
+    padding: 14px 22px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    background: #FAF7F0;
+    line-height: 1.5;
+  }
+
+  footer {
+    margin-top: 36px;
+    font-size: 0.76rem;
+    color: #9A9382;
+    line-height: 1.6;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-    <h2>Dog Skin Disease Classification</h2>
-    <p id="status">Initializing model...</p>
+  <header class="top">
+    <div class="eyebrow">Skin screening, from a photo</div>
+    <h1>What's going on<br>with their <em>skin?</em></h1>
+    <p class="sub">Upload a clear, well-lit photo of the affected area. This runs privately in your browser and gives a screening read — not a diagnosis.</p>
+  </header>
 
-    <!-- Image Input & Preview -->
-    <input type="file" id="imageUpload" accept="image/*">
-    <br><br>
-    <img id="imagePreview" width="256" height="256" style="display:none; object-fit: cover;" crossorigin="anonymous"/>
-    
-    <h3 id="result"></h3>
+  <div class="panel">
+    <div id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" style="display:none" />
+      <svg class="paw" viewBox="0 0 24 24" fill="none" stroke="#8A9C82" stroke-width="1.4">
+        <ellipse cx="12" cy="15.5" rx="5.2" ry="4.3"/>
+        <ellipse cx="6.2" cy="9.5" rx="1.8" ry="2.3"/>
+        <ellipse cx="10.6" cy="6.5" rx="1.8" ry="2.4"/>
+        <ellipse cx="15.4" cy="6.5" rx="1.8" ry="2.4"/>
+        <ellipse cx="19.8" cy="9.5" rx="1.8" ry="2.3"/>
+      </svg>
+      <div id="dropText"><strong>Click to upload</strong> or drag a photo here</div>
+      <div id="previewWrap">
+        <img id="preview" />
+        <div><button id="changePhoto" type="button">Choose a different photo</button></div>
+      </div>
+    </div>
 
-    <script>
-        let model;
-        
-        // Relative path to your model.json on GitHub Pages
-        const MODEL_URL = './tfjs_model/model.json';
+    <button id="submitBtn" disabled>
+      <span class="spin" id="spinner"></span>
+      <span id="btnLabel">Loading model…</span>
+    </button>
+    <div id="status"></div>
+    <div id="error"></div>
+  </div>
 
-        async function loadModel() {
-            try {
-                document.getElementById('status').innerText = "Loading model from GitHub Pages...";
-                
-                // Use tf.loadLayersModel for standard Colab/Keras models converted via tensorflowjs_converter
-                model = await tf.loadLayersModel(MODEL_URL);
-                
-                document.getElementById('status').innerText = "Model loaded successfully! Ready for classification.";
-            } catch (error) {
-                console.error("Error loading model:", error);
-                document.getElementById('status').innerText = "Error: Failed to load model. Check console for details.";
-            }
-        }
+  <div id="result">
+    <div class="slip">
+      <div class="slip-head">
+        <div>
+          <div class="slip-label">Most likely</div>
+          <div class="slip-class" id="topClass">—</div>
+        </div>
+        <div>
+          <div class="slip-conf-label">Confidence</div>
+          <div class="slip-conf" id="topConf">—</div>
+        </div>
+      </div>
+      <div class="slip-body" id="barList"></div>
+      <div class="slip-note">This is a screening tool, not a veterinary diagnosis. If something looks off, please have a vet take a look — especially for anything spreading, painful, or not improving.</div>
+    </div>
+  </div>
 
-        const imageUpload = document.getElementById('imageUpload');
-        imageUpload.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file || !model) return;
+  <footer>Runs fully in your browser. No photo is uploaded to a server.</footer>
+</div>
 
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const imgElement = document.getElementById('imagePreview');
-                imgElement.src = event.target.result;
-                imgElement.style.display = 'block';
+<script>
+  // --- CUSTOM LAYER REGISTRATION FIX ---
+  function registerPassThroughLayer(layerName) {
+    class PassThrough extends tf.layers.Layer {
+      constructor(config) { 
+        super(config); 
+      }
+      computeOutputShape(inputShape) { 
+        return inputShape; 
+      }
+      call(inputs) { 
+        return Array.isArray(inputs) ? inputs[0] : inputs; 
+      }
+      static get className() { 
+        return layerName; 
+      }
+    }
+    tf.serialization.registerClass(PassThrough);
+  }
 
-                imgElement.onload = async () => {
-                    document.getElementById('result').innerText = "Classifying...";
+  // Register the missing augmentation layers
+  registerPassThroughLayer('RandomFlip');
+  registerPassThroughLayer('RandomRotation');
+  registerPassThroughLayer('RandomZoom');
+  // -------------------------------------
 
-                    // Preprocess image to match training parameters (256x256, normalized to [0, 1])
-                    const tensor = tf.tidy(() => {
-                        return tf.browser.fromPixels(imgElement)
-                            .resizeBilinear([256, 256])
-                            .toFloat()
-                            .div(tf.scalar(255.0))
-                            .expandDims(0);
-                    });
+  const IMG_SIZE = 256;
+  const CLASS_NAMES = [
+    "Dermatitis",
+    "Fungal_infections",
+    "Healthy",
+    "Hypersensitivity",
+    "demodicosis",
+    "ringworm",
+  ];
+  const CLASS_COLOR = (name) => name.toLowerCase() === 'healthy' ? '#6E8F6C' : '#C8892C';
 
-                    // Execute prediction using standard Layers Model prediction method
-                    const predictionTensor = model.predict(tensor);
-                    const predictions = await predictionTensor.data();
-                    
-                    // Clear tensors from web memory
-                    tf.dispose([tensor, predictionTensor]);
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const dropText = document.getElementById('dropText');
+  const previewWrap = document.getElementById('previewWrap');
+  const preview = document.getElementById('preview');
+  const changePhoto = document.getElementById('changePhoto');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnLabel = document.getElementById('btnLabel');
+  const spinner = document.getElementById('spinner');
+  const statusDiv = document.getElementById('status');
+  const errorDiv = document.getElementById('error');
+  const resultDiv = document.getElementById('result');
+  const topClass = document.getElementById('topClass');
+  const topConf = document.getElementById('topConf');
+  const barList = document.getElementById('barList');
 
-                    // Classes listed precisely in training order
-                    const classes = [
-                        'Dermatitis', 
-                        'Fungal_infections', 
-                        'Healthy', 
-                        'Hypersensitivity', 
-                        'demodicosis', 
-                        'ringworm'
-                    ];
+  let selectedFile = null;
+  let model = null;
 
-                    // Find highest prediction index and probability
-                    let maxIndex = 0;
-                    let maxProb = predictions[0];
-                    for (let i = 1; i < predictions.length; i++) {
-                        if (predictions[i] > maxProb) {
-                            maxProb = predictions[i];
-                            maxIndex = i;
-                        }
-                    }
+  async function loadModel() {
+    try {
+      statusDiv.textContent = 'Loading model…';
+      model = await tf.loadLayersModel('tfjs_model/model.json');
+      statusDiv.textContent = '';
+      btnLabel.textContent = 'Check photo';
+      if (selectedFile) submitBtn.disabled = false;
+    } catch (err) {
+      statusDiv.textContent = '';
+      errorDiv.textContent = 'Could not load model: ' + err.message;
+      btnLabel.textContent = 'Model failed to load';
+    }
+  }
+  loadModel();
 
-                    document.getElementById('result').innerText = 
-                        `Prediction: ${classes[maxIndex]} (${(maxProb * 100).toFixed(2)}%)`;
-                };
-            };
-            reader.readAsDataURL(file);
-        });
+  dropzone.addEventListener('click', (e) => {
+    if (e.target === changePhoto) return;
+    fileInput.click();
+  });
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) handleFile(fileInput.files[0]);
+  });
+  changePhoto.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
 
-        loadModel();
-    </script>
+  function handleFile(file) {
+    selectedFile = file;
+    preview.src = URL.createObjectURL(file);
+    dropText.style.display = 'none';
+    previewWrap.style.display = 'block';
+    if (model) submitBtn.disabled = false;
+    errorDiv.textContent = '';
+    resultDiv.style.display = 'none';
+  }
+
+  submitBtn.addEventListener('click', async () => {
+    if (!selectedFile || !model) return;
+    submitBtn.disabled = true;
+    btnLabel.textContent = 'Reading the photo…';
+    spinner.style.display = 'inline-block';
+    errorDiv.textContent = '';
+
+    try {
+      const scores = await runPrediction(preview);
+      renderResult(scores);
+    } catch (err) {
+      errorDiv.textContent = err.message;
+    } finally {
+      submitBtn.disabled = false;
+      btnLabel.textContent = 'Check photo';
+      spinner.style.display = 'none';
+    }
+  });
+
+  async function runPrediction(imgElement) {
+    const tensor = tf.tidy(() => {
+      return tf.browser.fromPixels(imgElement)
+        .resizeBilinear([IMG_SIZE, IMG_SIZE])
+        .toFloat()
+        .div(255.0)
+        .expandDims(0);
+    });
+
+    const prediction = model.predict(tensor);
+    const scoresArray = await prediction.data();
+    tensor.dispose();
+    prediction.dispose();
+
+    const scores = {};
+    CLASS_NAMES.forEach((name, i) => { scores[name] = scoresArray[i]; });
+    return scores;
+  }
+
+  function renderResult(scores) {
+    const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const [leadName, leadScore] = entries[0];
+
+    topClass.textContent = leadName.replace(/_/g, ' ');
+    topClass.style.color = CLASS_COLOR(leadName);
+    topConf.textContent = (leadScore * 100).toFixed(1) + '%';
+
+    barList.innerHTML = '';
+    entries.forEach(([name, score], i) => {
+      const pct = (score * 100).toFixed(1);
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = `
+        <div class="bar-name ${i === 0 ? 'top' : ''}">${name.replace(/_/g, ' ')}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:0%; background:${CLASS_COLOR(name)}"></div></div>
+        <div class="bar-pct">${pct}%</div>
+      `;
+      barList.appendChild(row);
+      requestAnimationFrame(() => {
+        row.querySelector('.bar-fill').style.width = pct + '%';
+      });
+    });
+
+    resultDiv.style.display = 'block';
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
 </body>
 </html>
